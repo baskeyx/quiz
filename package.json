@@ -1,0 +1,10 @@
+{
+  "name": "oasis-global-css",
+  "version": "1.0.0",
+  "description": " Oasis Global CSS build",
+  "Private": true,
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-sass": "3.1.0"
+  }
+}
