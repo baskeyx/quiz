@@ -1,36 +1,39 @@
+'use strict';
+
 const gulp = require('gulp');
 const sass = require('gulp-sass');
-const browserSync = require('browser-sync').create();
-const jshint = require('gulp-jshint');
+const concat = require('gulp-concat');
 const uglify = require('gulp-uglify');
-const rename = require('gulp-rename');
 const htmlmin = require('gulp-htmlmin');
+const rename = require('gulp-rename');
+const maps = require('gulp-sourcemaps');
+const browserSync = require('browser-sync');
+const replace = require('gulp-replace');
 
-//sass
+// convert sass into css and create source map
 gulp.task('sass', function () {
-    gulp.src(['sass/*.scss'])
-        .pipe(sass({outputStyle: 'compressed'}))
-        .pipe(gulp.dest('dist/css/'))
-        .pipe(browserSync.stream({match: '**/*.css'}));
+  gulp.src(['sass/*.scss'])
+    .pipe(maps.init())
+    .pipe(sass({outputStyle: 'compressed'}))
+    .on('error', function (err) {
+        console.log(err.toString());
+
+        this.emit('end');
+    })
+    .pipe(maps.write('./'))
+    .pipe(gulp.dest('css/'))
+    .pipe(browserSync.stream({match: '**/*.css'}));
 });
 
-// browserSync
-gulp.task('browser-sync', function() {
-    browserSync.init({
-        server: {
-            baseDir: "dist/"
-        }
-    });
+// concatonate all js in the scripts directory and output to js
+gulp.task('concat', function () {
+  gulp.src('scripts/*.js')
+    .pipe(concat('script.js'))
+    .pipe(gulp.dest('./js'))
+    .pipe(browserSync.stream({match: '**/*.js'}));
 });
 
-// javaScript
-gulp.task('lint', function() {
-    gulp.src('js/*.js')
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'))
-        .pipe(browserSync.stream({match: '**/*.js'}));
-});
-
+// minify JavaScript
 gulp.task('compress', function () {
   gulp.src('js/*.js')
     .pipe(uglify())
@@ -38,20 +41,36 @@ gulp.task('compress', function () {
     .pipe(gulp.dest('dist/js'))
 });
 
-gulp.task('html-min', function(){
+
+gulp.task('browser-sync', function () {
+    browserSync.init({
+        server: {
+            baseDir: "./"
+        }
+    });
+});
+
+// replace scripts with minified version and minify html markup
+gulp.task('html', function (){
   gulp.src('*.html')
+    .pipe(replace('js/script.js', 'js/script.min.js'))
     .pipe(htmlmin({collapseWhitespace: true}))
     .pipe(gulp.dest('dist'));
 });
 
-gulp.task('css',['sass']);
+// move files to dist
+gulp.task('move', function (){
+  gulp.src('img/*')
+  .pipe(gulp.dest('dist/img'));
+  gulp.src('css/*')
+  .pipe(gulp.dest('dist/css'));
+})
 
-gulp.task('js', ['lint', 'compress']);
+gulp.task('build', ['html', 'compress', 'move']);
 
 gulp.task('watch', function(){
 	gulp.watch('sass/**', ['sass']);
-  gulp.watch('js/**',['js']);
-  gulp.watch('*.html',['html-min']);
+  gulp.watch('scripts/**',['concat']);
 });
 
-gulp.task('default', ['browser-sync', 'watch']);
+gulp.task('default', ['sass','concat','watch','browser-sync']);

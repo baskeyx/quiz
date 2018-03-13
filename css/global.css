@@ -1,0 +1,3 @@
+@import url("https://fonts.googleapis.com/css?family=Lato");.quiz-con{width:100%;max-width:1220px;margin:0 auto;font-family:Lato;text-align:center}.question{display:none}.question span{padding:5px;display:inline-block;border-bottom:1px solid #000}.question.question-0{display:block}.answer{padding:5px 0 5px;cursor:pointer}.confirmation{display:none}.complete .confirmation{display:block}.quiz{padding-bottom:5px}
+
+/*# sourceMappingURL=global.css.map */
